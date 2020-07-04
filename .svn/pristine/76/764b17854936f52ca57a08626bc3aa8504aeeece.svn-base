@@ -1,0 +1,33 @@
+package com.company.jdbc.service.iservice;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+
+import com.company.jdbc.entity.User;
+import com.company.jdbc.vo.QueryVo;
+
+public interface IUserService extends IBaseService<User, Integer> {
+	
+	String login(String username,String password);
+
+	String regist(User user);
+
+	Map<String,Object> getUserInfo(Integer id);
+	
+	/**
+	 * 列出所有用户名
+	 * @return 用户名列表
+	 */
+	List<String> listUsernames();
+	/**
+	 * 
+	 * @param accountFrom 转出账户
+	 * @param accountTo 转入账户
+	 * @param money 转账金额
+	 * @return 操作提示
+	 */
+	String transMoney(String accountFrom,String accountTo,BigDecimal money);
+
+	List<User> dynamicSearch(QueryVo vo);
+}

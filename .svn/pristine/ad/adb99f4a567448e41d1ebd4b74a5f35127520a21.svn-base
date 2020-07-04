@@ -1,0 +1,76 @@
+package com.company.jdbc.dao;
+
+import java.math.BigDecimal;
+
+import org.junit.Test;
+
+import com.company.jdbc.dao.idao.IUserDao;
+import com.company.jdbc.dao.impl.UserDao;
+import com.company.jdbc.entity.User;
+
+import junit.framework.TestCase;
+
+public class UserDaoTest {
+	private IUserDao userDao = new UserDao();
+
+	@Test
+	public void testLogin() throws Exception {
+		User user = userDao.login("root","123456");
+		System.out.println(user);
+	}
+
+	@Test
+	public void testGetUserInfo() throws Exception {
+		System.out.println(userDao.getUserInfo(1));
+	}
+
+	@Test
+	public void testRegist() throws Exception {
+		System.out.println(userDao.regist(new User("testUser", "testPwd", new BigDecimal("1234.56"))));
+	}
+
+	@Test
+	public void testFindAll() throws Exception {
+		userDao.findAll().stream().forEach(System.out::println);
+	}
+
+	@Test
+	public void testFindByPage() throws Exception {
+		userDao.findByPage(2, 3).stream().forEach(System.out::println);
+	}
+
+	@Test
+	public void testFindByName() throws Exception {
+		userDao.findByName("a").stream().forEach(System.out::println);
+	}
+
+	@Test
+	public void testFindById() throws Exception {
+		System.err.println(userDao.findById(1));
+		System.err.println(userDao.findById(99));
+	}
+
+	@Test
+	public void testInsert() throws Exception {
+		User user = new User("t-username", "t-password", new BigDecimal("1.23"));
+		TestCase.assertEquals(1, userDao.insert(user));
+	}
+
+	@Test
+	public void testDelete() throws Exception {
+		User user = new User();
+		user.setId(15);
+		System.out.println(userDao.delete(user));
+	}
+
+	@Test
+	public void testUpdate() throws Exception {
+		User user = userDao.findById(9);
+		user.setUsername("test_UPDATE");
+		user.setPassword("test-update-pwd");
+		userDao.update(user);
+	}
+	
+	
+
+}

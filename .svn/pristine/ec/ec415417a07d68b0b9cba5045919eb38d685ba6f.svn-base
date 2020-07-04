@@ -1,0 +1,46 @@
+package com.company.jdbc.service.iservice;
+
+import java.math.BigDecimal;
+
+import org.junit.Test;
+
+import com.company.jdbc.service.impl.UserService;
+
+public class IUserServiceTest {
+
+	private IUserService userService = new UserService();
+	@Test
+	public void testLogin() {
+		System.out.println(userService.login(null, "123"));
+		System.out.println(userService.login("root", null));
+		System.out.println(userService.login("root","12"));
+		System.out.println(userService.login("root", "123"));
+		System.out.println(userService.login("root111", "123"));
+	}
+	
+	@Test
+	public void testGetUserInfo() {
+//		System.out.println(userService.getUserInfo(null));
+		System.out.println(userService.getUserInfo(1));
+//		System.out.println(userService.getUserInfo(99));
+	}
+	
+	@Test
+	public void testFindById() {
+		System.out.println(userService.findById(null));
+		System.out.println(userService.findById(1));
+		System.out.println(userService.findById(99));
+	}
+	@Test
+	public void testListUsernames() {
+		userService.listUsernames().stream().forEach(System.out::println);
+	}
+
+	
+	@Test
+	public void testTransMoney() {
+		System.err.println(userService.transMoney(null,null,null ));
+		System.err.println(userService.transMoney("root","admin",new BigDecimal("5000") ));
+		System.err.println(userService.transMoney("root","admin",new BigDecimal("555000")));
+	}
+}

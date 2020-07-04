@@ -1,0 +1,52 @@
+package com.company.jdbc.controller.user;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.company.jdbc.common.Const;
+import com.company.jdbc.entity.User;
+import com.company.jdbc.service.ServiceFactory;
+import com.company.jdbc.service.iservice.IUserService;
+
+@WebServlet("/UserUpdateServlet")
+public class UserUpdateServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// 3-反馈
+		HttpSession session = request.getSession();
+		session.setAttribute(Const.User.ERROR_MSG, "请使用post请求方式");
+		response.sendRedirect(request.getContextPath() + "/error.jsp");
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		// 1-取值
+		int id = Integer.parseInt(request.getParameter("id"));
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String salStr = request.getParameter("sal");
+		BigDecimal sal = new BigDecimal(salStr == null ? "0" : salStr);
+		// 2- 处理
+		IUserService userService = ServiceFactory.getUserServiceInstance();
+		User user = new User(id,username,password,sal);
+		String msg = userService.update(user);
+		
+		// 3- 反馈
+		if (msg.indexOf("success") != -1) {
+			response.sendRedirect(request.getContextPath() + "/UserFindAllServlet");
+		} else {
+			HttpSession session = request.getSession();
+			session.setAttribute(Const.User.ERROR_MSG, msg.substring(6));
+			response.sendRedirect(request.getContextPath() + "/error.jsp");
+		}
+	}
+}

@@ -1,0 +1,265 @@
+package com.company.jdbc.service.impl;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.company.jdbc.common.ResultEnum;
+import com.company.jdbc.dao.factory.DaoFactory;
+import com.company.jdbc.dao.idao.IUserDao;
+import com.company.jdbc.entity.User;
+import com.company.jdbc.service.iservice.IUserService;
+import com.company.jdbc.vo.QueryVo;
+
+public class UserService implements IUserService {
+	private IUserDao userDao;
+
+	public UserService() {
+		userDao = DaoFactory.getUserDaoInstance();
+	}
+
+	@Override
+	public Map<String, Object> getUserInfo(Integer id) {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		// 1-取值
+		if (id == null) {
+			resultMap.put("msg", ResultEnum.ERROR_ID_IS_NULL.getMsg());
+			resultMap.put("data", null);
+			return resultMap;
+		}
+		// 2-处理
+		User user = null;
+		try {
+			user = userDao.getUserInfo(id);
+			resultMap.put("msg",
+					user == null ? ResultEnum.ERROR_RESULT_NOT_FOUND.getMsg() : ResultEnum.SUCCESS.getMsg());
+			resultMap.put("data", user == null ? null : user);
+			return resultMap;
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("msg", ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg());
+			resultMap.put("data", null);
+			return resultMap;
+		}
+	}
+
+	@Override
+	public String login(String username, String password) {
+		// 1-取值（校验入参）
+		if (username == null) {
+			return ResultEnum.ERROR_USER_IS_NULL.getMsg();
+		}
+		if (password == null) {
+			return ResultEnum.ERROR_PASSWORD_IS_NULL.getMsg();
+		}
+		if (password.length() < 3) {
+			return ResultEnum.ERROR_PASSWORD_LENGTH_LIMIT.getMsg();
+		}
+		// 2-处理 userDao
+		int result = 0;
+		try {
+			result = userDao.login(username, password);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg();
+		}
+		// 3-反馈
+		return result > 0 ? ResultEnum.SUCCESS_LOGIN.getMsg() : ResultEnum.ERROR_LOGIN.getMsg();
+	}
+
+	// DML
+
+	@Override
+	public String regist(User user) {
+		if (user == null) {
+			return "error:注册用户信息为空";
+		}
+		if (user.getUsername() == null || user.getPassword() == null) {
+			return "error:用户名及密码不能为空";
+		}
+		int result = 0;
+		try {
+			result = userDao.regist(user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg();
+		}
+
+		return result > 0 ? ResultEnum.SUCCESS.getMsg() : ResultEnum.ERROR_REGIST.getMsg();
+	}
+
+	@Override
+	public String insert(User t) {
+		if (t == null) {
+			return "error:用户信息为空";
+		}
+		if (t.getUsername() == null || t.getPassword() == null) {
+			return "error:用户名及密码不能为空";
+		}
+		int result = 0;
+		try {
+			result = userDao.regist(t);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg();
+		}
+
+		return result > 0 ? ResultEnum.SUCCESS.getMsg() : ResultEnum.ERROR_INSERT.getMsg();
+	}
+
+	@Override
+	public String delete(User t) {
+		if (t == null) {
+			return "error:用户信息为空";
+		}
+		if (t.getId() < 0) {
+			return "error:ID不符合规范";
+		}
+		int result = 0;
+		try {
+			result = userDao.delete(t);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg();
+		}
+
+		return result > 0 ? ResultEnum.SUCCESS.getMsg() : ResultEnum.ERROR_DELETE.getMsg();
+	}
+
+	@Override
+	public String update(User t) {
+		if (t == null) {
+			return "error:用户信息为空";
+		}
+		if (findById(t.getId()) == null) {
+			return "error:用户不存在，无法修改";
+		}
+		int result = 0;
+		try {
+			result = userDao.update(t);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResultEnum.ERROR_DAO_SQL_EXCEPTION.getMsg();
+		}
+
+		return result > 0 ? ResultEnum.SUCCESS.getMsg() : ResultEnum.ERROR_UPDATE.getMsg();
+	}
+
+	// DQL
+
+	@Override
+	public List<User> findAll() {
+		List<User> users = null;
+		try {
+			users = userDao.findAll();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return users;
+
+	}
+
+	@Override
+	public List<User> findByPage(int page, int size) {
+		if (page <= 0)
+			page = 1;
+		if (size <= 0)
+			size = 10;
+		List<User> users = null;
+		try {
+			users = userDao.findByPage(page, size);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return users;
+	}
+
+	@Override
+	public List<User> findByName(String name) {
+		List<User> users = null;
+		try {
+			users = userDao.findByName(name);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return users;
+	}
+
+	@Override
+	public User findById(Integer id) {
+		User user = null;
+		try {
+			user = userDao.findById(id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return user;
+	}
+
+	@Override
+	public List<String> listUsernames() {
+		List<String> usernames = null;
+		try {
+			usernames = userDao.listUsernames();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return usernames;
+	}
+
+	@Override
+	public String transMoney(String accountFrom, String accountTo, BigDecimal money) {
+		// 1-取值（校验）
+		if (accountFrom == null || accountFrom.trim() == "") {
+			return "error:请填写/选择转出账户";
+		}
+		if (accountTo == null || accountTo.trim() == "") {
+			return "error:请填写/选择转入账户";
+		}
+		if (money == null || money.doubleValue() <= 0) {
+			return "error:请输入正确转账金额";
+		}
+		// 2-处理（业务逻辑的校验：例如money不能少于accountFrom的余额数，然后实现转账）
+		BigDecimal balance = null;
+		try {
+			balance = userDao.findBalanceByUsername(accountFrom);
+			if (money.doubleValue() > balance.doubleValue()) {
+				return "error:该转出账户余额不足，请更换其他账户";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "error:取账户余额失败";
+		}
+		boolean result = userDao.transMoney(accountFrom,accountTo,money);
+		// 3-反馈
+		return result?"success:转账成功":"error:转账失败";
+	}
+
+	@Override
+	public List<User> dynamicSearch(QueryVo vo) {
+		//验证vo的工资范围
+		String minSal = vo.getMinSal();
+		String maxSal = vo.getMaxSal();
+		if(StringUtils.isBlank(minSal)) vo.setMinSal("0");
+		if(StringUtils.isBlank(maxSal)) vo.setMaxSal("10000000");
+		if(StringUtils.isNotBlank(minSal) && StringUtils.isNotBlank(maxSal)) {
+			double min = Double.parseDouble(minSal);
+			double max = Double.parseDouble(maxSal);
+			if(min > max) {
+				vo.setMaxSal(minSal);
+				vo.setMinSal(maxSal);
+			}
+		}
+		List<User> result = null;
+		try {
+			result = userDao.dynamicSearch(vo);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+}

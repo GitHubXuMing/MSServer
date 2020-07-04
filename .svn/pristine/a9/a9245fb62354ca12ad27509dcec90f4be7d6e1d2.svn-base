@@ -1,0 +1,51 @@
+package com.company.jdbc.controller.user;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.company.jdbc.common.Const;
+import com.company.jdbc.entity.User;
+import com.company.jdbc.service.ServiceFactory;
+import com.company.jdbc.service.iservice.IUserService;
+
+@WebServlet("/UserFindAllServlet")
+public class UserFindAllServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// 1-取值
+
+		// 2-处理
+		HttpSession session = request.getSession();
+		String username = (String) session.getAttribute(Const.User.CURRENT_USER);
+		if (username != null) {
+			IUserService userService = ServiceFactory.getUserServiceInstance();
+			List<User> userList = userService.findAll();
+
+			// 3-反馈 -- 跳转页面 forward转发（有参数需要传递给下一个请求）
+			request.setAttribute("userListFromServer", userList);
+			request.getRequestDispatcher("/WEB-INF/user/userFindAll.jsp").forward(request, response);
+		}else {
+			System.out.println("用户未登陆，无权限访问数据，被重定向到登陆页面");
+			response.sendRedirect(request.getContextPath()+"/index.jsp");
+		}
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		// 3-反馈
+		HttpSession session = request.getSession();
+		session.setAttribute(Const.User.ERROR_MSG, "请使用get请求方式获取数据信息");
+		response.sendRedirect(request.getContextPath()+"/error.jsp");
+	}
+}

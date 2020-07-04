@@ -1,0 +1,47 @@
+package com.company.jdbc.controller.user;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.company.jdbc.common.Const;
+import com.company.jdbc.entity.User;
+import com.company.jdbc.service.ServiceFactory;
+import com.company.jdbc.service.iservice.IUserService;
+
+/**
+ * Servlet implementation class UserDeleteServlet
+ */
+@WebServlet("/UserDeleteServlet")
+public class UserDeleteServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//1-取值
+		int userid = Integer.parseInt(request.getParameter("userid"));
+		//2- 处理
+		IUserService userService = ServiceFactory.getUserServiceInstance();
+		User t = new User();
+		t.setId(userid);
+		String msg = userService.delete(t);
+		//3- 反馈
+		if(msg.indexOf("success") != -1) {
+			response.sendRedirect(request.getContextPath()+"/UserFindAllServlet");
+		}else {
+			HttpSession session = request.getSession();
+			session.setAttribute(Const.User.ERROR_MSG, msg.substring(6));
+			response.sendRedirect(request.getContextPath()+"/error.jsp");
+		}
+	}
+
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doGet(request, response);
+	}
+
+}
