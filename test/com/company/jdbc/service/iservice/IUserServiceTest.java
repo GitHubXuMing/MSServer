@@ -29,4 +29,9 @@ public class IUserServiceTest {
 		Res<List<User>> result = userService.findByPage(10, 10);
 		System.err.println(JSON.toJSONString(result));
 	}
+	@Test
+	public void testDelete() {
+		Res result = userService.delete(4);
+		System.err.println(JSON.toJSONString(result));
+	}
 }

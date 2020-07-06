@@ -146,16 +146,22 @@ public class UserDao implements IUserDao {
 
 	@Override
 	public List<User> dynamicSearch(QueryVo vo) throws Exception {
-		System.err.println("************"+vo);
 		QueryRunner qr = new QueryRunner(DBUtils.dataSource);
-		StringBuilder buffer = new StringBuilder("select id,username,password,sal from user where sal between "+vo.getMinSal()+" and "+vo.getMaxSal()+" ");
-		if (vo.getId().length()>0) {
-			buffer.append("and id=" + vo.getId());
-		} else {
-			if (vo.getUsername() != null || vo.getUsername() != "") {
-				buffer.append("and username like '%" + vo.getUsername() + "%'");
-			}
+		if (vo.getMinSal() == null || vo.getMinSal().trim().equals("")) {
+			vo.setMinSal("0");
 		}
+		if (vo.getMaxSal() == null || vo.getMaxSal().trim().equals("")) {
+			vo.setMaxSal("99999");
+		}
+		StringBuilder buffer = new StringBuilder("select id,username,password,sal from user where sal between "
+				+ vo.getMinSal() + " and " + vo.getMaxSal() + " ");
+		if (vo.getId() != null && vo.getId().length() > 0) {
+			buffer.append("and id=" + vo.getId()+" ");
+		}
+		if (vo.getUsername() != null && vo.getUsername().trim().length() > 0) {
+			buffer.append("and username like '%" + vo.getUsername() + "%'");
+		}
+
 		String sql = buffer.toString();
 		List<User> users = qr.query(sql, new BeanListHandler<User>(User.class));
 		return users;
@@ -165,7 +171,7 @@ public class UserDao implements IUserDao {
 	public int exist(String username) throws Exception {
 		QueryRunner qr = new QueryRunner(DBUtils.dataSource);
 		String sql = "select count(*) from user where username=?";
-		Long result = qr.query(sql,new ScalarHandler<Long>(), username );
+		Long result = qr.query(sql, new ScalarHandler<Long>(), username);
 		return result.intValue();
 	}
 
@@ -173,7 +179,7 @@ public class UserDao implements IUserDao {
 	public int reg(String username, String password) throws Exception {
 		QueryRunner qr = new QueryRunner(DBUtils.dataSource);
 		String sql = "insert into user(username,password,sal) values(?,?,?)";
-		int result = qr.update(sql,username,password,new BigDecimal("0"));
+		int result = qr.update(sql, username, password, new BigDecimal("0"));
 		return result;
 	}
 

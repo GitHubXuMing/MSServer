@@ -8,6 +8,7 @@ import com.company.jdbc.dao.factory.DaoFactory;
 import com.company.jdbc.dao.idao.IUserDao;
 import com.company.jdbc.entity.User;
 import com.company.jdbc.service.iservice.IUserService;
+import com.company.jdbc.vo.QueryVo;
 
 public class UserService implements IUserService {
 	private IUserDao userDao;
@@ -59,6 +60,73 @@ public class UserService implements IUserService {
 			List<User> users = userDao.findByPage(page, size);
 			if(users != null && users.size()>0) {
 				return  Res.success(ResEnum.SUCCESS,users);
+			}else {
+				return Res.error(ResEnum.NO_DATA_FOUND_ERROR);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Res.error(ResEnum.ERROR);
+		}
+	}
+
+	@Override
+	public Res delete(Integer id) {
+		if(id == null) {
+			return Res.error(ResEnum.ILLEGLE_PARAM);
+		}
+		User user = new User();
+		user.setId(id);
+		try {
+			userDao.delete(user);
+			return Res.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Res.error(ResEnum.ERROR);
+		}
+	}
+
+	@Override
+	public Res<User> findById(Integer id) {
+		if(id == null) {
+			return Res.error(ResEnum.ILLEGLE_PARAM);
+		}
+		try {
+			User user = userDao.findById(id);
+			return user==null?Res.error(ResEnum.NO_SUCH_DATA):Res.success(ResEnum.SUCCESS,user);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Res.error(ResEnum.ERROR);
+		}
+	}
+
+	@Override
+	public Res update(User user) {
+		try {
+			userDao.update(user);
+			return Res.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Res.error(ResEnum.ERROR);
+		}
+	}
+
+	@Override
+	public Res insert(User user) {
+		try {
+			userDao.insert(user);
+			return Res.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Res.error(ResEnum.ERROR);
+		}
+	}
+
+	@Override
+	public Res<List<User>> dynamicSelect(QueryVo qv) {
+		try {
+			List<User> users = userDao.dynamicSearch(qv);
+			if(users != null && users.size() > 0) {
+				return Res.success(ResEnum.SUCCESS, users);
 			}else {
 				return Res.error(ResEnum.NO_DATA_FOUND_ERROR);
 			}
